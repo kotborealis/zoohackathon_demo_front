@@ -10,6 +10,7 @@ export const MarkerShip = ({lat, lon, vesselName}) =>
         <div className={style.ship}>
             <img
                 src={"https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/emojione/211/ship_1f6a2.png"}/>
-            LAT={lat},LON={lon},NAME={vesselName}
+            <br/>
+            {vesselName}
         </div>
     </Marker>;

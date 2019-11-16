@@ -22,6 +22,9 @@ const apiUrlBuilder = ({
     `&dateStart=${dateStart}` +
     `&dateEnd=${dateEnd}`;
 
+console.warn(`n - advance time by 1 min`);
+console.warn(`~ - show debug`);
+
 export const Index = (props) => {
     const [mapState, setMapState] = useState({
         width: '100%',
@@ -32,14 +35,16 @@ export const Index = (props) => {
     });
 
     const [, _updateState] = useState();
-    const updateState = () => _updateState(Math.random());
+    const forceUpdateState = () => _updateState(Math.random());
 
     const [shipsTracking, setShipsTracking] = useState({});
     const [shipTracksStep, setShipTracksStep] = useState(0);
 
+    const initialTimeRange = Date.UTC(2017, 11, 15, 0, 0, 0);
+
     const [timeRange, setTimeRange] = useState([
-        Date.UTC(2017, 11, 15, 0, 0, 0),
-        Date.UTC(2017, 11, 15, 0, 1, 0)
+        initialTimeRange,
+        initialTimeRange + 60 * 1000
     ]);
 
     const {data: shipsApiData} = useApi(apiUrlBuilder({
@@ -55,21 +60,27 @@ export const Index = (props) => {
         });
     }, [timeRange[0]]);
 
-    useHotkeys('n', () => {
-        setTimeRange(([prev, cur]) => {
-            return [prev + 60 * 1000, cur + 60 * 1000];
-        });
-        setShipTracksStep(i => i + 1);
+    useHotkeys('n, p', (event, {key}) => {
+        const dir = key === 'n' ? 1 : -1;
+        const s = 60 * 1000;
+
+        setShipTracksStep(i => !i && dir < 0 ? 0 : i + dir);
+        setTimeRange(([prev, cur]) =>
+            (prev === initialTimeRange && dir < 0)
+                ? [prev, cur]
+                : [prev + s * dir, cur + s * dir]
+        );
     });
 
     const [debug, setDebug] = useState(false);
-    useHotkeys('d', () => {
+    useHotkeys('`', () => {
         setDebug(debug => !debug);
     });
 
+    const markers = useRef(dataMarkers);
+
     const [enableMarkerCreation, setEnableMarkerCreation] = useState(false);
     const [currentMarker, setCurrentMarker] = useState('🐟');
-    const markers = useRef(dataMarkers);
 
     useHotkeys('e', () => {
         console.log(JSON.stringify(markers.current));
@@ -77,27 +88,56 @@ export const Index = (props) => {
 
     const [enableShipCreation, setEnableShipCreation] = useState(false);
     const [currentShipName, setCurrentShipName] = useState('ПРЕЗИДЕНТ ЕЛЬЦИН');
-    const shipsCustomTracks = useRef([]);
 
     const onClickHandler = ({lngLat: [longitude, latitude]}) => {
         if(!debug) return;
+
         if(enableMarkerCreation){
-            markers.current = [...markers.current, {
+            markers.current.custom = [...markers.current.custom, {
                 longitude, latitude, marker: currentMarker
             }];
-            updateState();
-            return;
-        }
-        if(enableShipCreation){
-            if(!shipsCustomTracks.current[shipTracksStep])
-                shipsCustomTracks.current[shipTracksStep] = [];
+            forceUpdateState();
 
-            shipsCustomTracks.current[shipTracksStep].push({
+        }
+        else if(enableShipCreation){
+            console.log("Create ship", shipTracksStep, {
                 longitude, latitude, name: currentShipName
             });
-            updateState();
+            if(!markers.current.ships[shipTracksStep])
+                markers.current.ships[shipTracksStep] = [];
+
+            markers.current.ships[shipTracksStep].push({
+                longitude, latitude, name: currentShipName
+            });
+            forceUpdateState();
         }
     };
+
+    const debugOverlay = (<HTMLOverlay
+        redraw={() => <div
+            style={{color: "black", background: "white", padding: "5px", width: "100%", height: "300px"}}>
+            <div>
+                <b>TimeRange:</b> {(new Date(timeRange[0])).toString()} — {(new Date(timeRange[1])).toString()}
+            </div>
+            <div>
+                <b>TracksStep:</b> {shipTracksStep}
+            </div>
+            <div>
+                <b>Markers: </b>
+                <input type="checkbox" checked={enableMarkerCreation}
+                       onChange={({target: {checked}}) => setEnableMarkerCreation(checked)}/>
+                <input type={"text"} value={currentMarker}
+                       onChange={({target: {value}}) => setCurrentMarker(value)}/>
+            </div>
+            <div>
+                <b>Ship creation: </b>
+                <input type="checkbox" checked={enableShipCreation}
+                       onChange={({target: {checked}}) => setEnableShipCreation(checked)}/>
+                <input type={"text"} value={currentShipName}
+                       onChange={({target: {value}}) => setCurrentShipName(value)}/>
+            </div>
+        </div>}
+    />);
 
     return (<div className={styles.container}>
         <ReactMapGL
@@ -110,36 +150,17 @@ export const Index = (props) => {
             <div style={{position: 'absolute', right: 0}}>
                 <FullscreenControl container={document.querySelector('body')}/>
             </div>
+            {markers.current.custom.map(({longitude, latitude, marker}) =>
+                <Marker longitude={longitude} latitude={latitude}>{marker}</Marker>
+            )}
             {Object.keys(shipsTracking).map((key) => (
                 <MarkerShip {...shipsTracking[key]}/>
             ))}
-            {markers.current.map(({longitude, latitude, marker}) =>
-                <Marker longitude={longitude} latitude={latitude}>{marker}</Marker>
-            )}
-            {debug && <HTMLOverlay
-                redraw={() => <div
-                    style={{color: "black", background: "white", padding: "5px", width: "100%", height: "300px"}}>
-                    <div>
-                        <b>TimeRange:</b> {(new Date(timeRange[0])).toString()} — {(new Date(timeRange[1])).toString()}
-                    </div>
-                    <div>
-                        <b>Markers: </b>
-                        <input type="checkbox" checked={enableMarkerCreation}
-                               onChange={({target: {checked}}) => setEnableMarkerCreation(checked)}/>
-                        <input type={"text"} value={currentMarker}
-                               onChange={({target: {value}}) => setCurrentMarker(value)}/>
-                    </div>
-                    <div>
-                        <b>Ship creation</b>
-                        <input type="checkbox" checked={enableShipCreation}
-                               onChange={({target: {checked}}) => setEnableShipCreation(checked)}/>
-                        <br/>
-                        Ship name: <br/>
-                        <input type={"text"} value={currentShipName}
-                               onChange={({target: {value}}) => setCurrentShipName(value)}/>
-                    </div>
-                </div>}
-            />}
+            {markers.current.ships[shipTracksStep] &&
+             markers.current.ships[shipTracksStep].map(({longitude, latitude, name}) =>
+                 <MarkerShip lat={latitude} lon={longitude} vesselName={name}/>
+             )}
+            {debug && debugOverlay}
         </ReactMapGL>
     </div>);
 };

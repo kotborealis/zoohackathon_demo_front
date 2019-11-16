@@ -1,6 +1,6 @@
 .container {
     height: 94vh !important;
-    width: 100vw !important;;
+    width: 100%;
 }
 
 :global body {

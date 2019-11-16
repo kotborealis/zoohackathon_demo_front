@@ -5,6 +5,7 @@ import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import {Index} from './components/index';
 import {RegistrationForm} from './components/registration/registration';
 import {Nav, Navbar} from 'react-bootstrap';
+import {Dashboard} from './components/dashboard/dashboard';
 
 render(
     (<div>
@@ -15,6 +16,7 @@ render(
                 <Nav className="mr-auto">
                     <Nav.Link href="/">Home</Nav.Link>
                     <Nav.Link href="/subscribe">Subscribe</Nav.Link>
+                    <Nav.Link href="/dashboard">Dashboard</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>
@@ -25,6 +27,9 @@ render(
                 </Route>
                 <Route path="/subscribe">
                     <RegistrationForm/>
+                </Route>
+                <Route path="/dashboard">
+                    <Dashboard/>
                 </Route>
             </Switch>
         </BrowserRouter>

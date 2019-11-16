@@ -1,10 +1,33 @@
 import React, {useState} from 'react';
-import {useApi} from '../../hooks/useApi';
-import ReactMapGL, {FullscreenControl, Marker} from 'react-map-gl';
+import ReactMapGL, {FullscreenControl} from 'react-map-gl';
 import styles from './index.css';
+import {MarkerShip} from '../markerShip/MarkerShip';
 
 export const Index = (props) => {
-    const {data} = useApi(['/adduser']);
+    //const {data} = useApi(['/adduser']);
+    const {data: shipsData} = {
+        data: [
+            {
+                MMSI: "367681000",
+                BaseDateTime: "2017-12-01T00:12:59",
+                LAT: 51.78481,
+                LON: -178.16754,
+                SOG: 7.9,
+                COG: 137.1,
+                Heading: 144.0,
+                VesselName: "ALASKA TROJAN",
+                IMO: "IMO7933646",
+                CallSign: "WTS3158",
+                VesselType: "1001",
+                Status: undefined,
+                Length: 28.75,
+                Width: 9.15,
+                Draft: undefined,
+                Cargo: undefined,
+            }
+        ]
+    };
+
     const [mapState, setMapState] = useState({
         width: '100%',
         height: '100%',
@@ -22,18 +45,9 @@ export const Index = (props) => {
             <div style={{position: 'absolute', right: 0}}>
                 <FullscreenControl container={document.querySelector('body')}/>
             </div>
-            <Marker latitude={37.78} longitude={-122.41} offsetLeft={-20} offsetTop={-10}>
-                <div>
-                    <img
-                        src={"https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/emojione/211/ship_1f6a2.png"}/>
-                </div>
-            </Marker>
-            <Marker latitude={38.78} longitude={-122.41} offsetLeft={-20} offsetTop={-10}>
-                <div>
-                    <img
-                        src={"https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/emojione/211/ship_1f6a2.png"}/>
-                </div>
-            </Marker>
+            {shipsData.map((data) => (
+                <MarkerShip {...data}/>
+            ))}
         </ReactMapGL>
     </div>);
 };

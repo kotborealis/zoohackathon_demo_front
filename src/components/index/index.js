@@ -2,31 +2,18 @@ import React, {useState} from 'react';
 import ReactMapGL, {FullscreenControl} from 'react-map-gl';
 import styles from './index.css';
 import {MarkerShip} from '../markerShip/MarkerShip';
+import {useApi} from '../../hooks/useApi';
+import {useHotkeys} from 'react-hotkeys-hook';
 
 export const Index = (props) => {
-    //const {data} = useApi(['/adduser']);
-    const {data: shipsData} = {
-        data: [
-            {
-                MMSI: "367681000",
-                BaseDateTime: "2017-12-01T00:12:59",
-                LAT: 51.78481,
-                LON: -178.16754,
-                SOG: 7.9,
-                COG: 137.1,
-                Heading: 144.0,
-                VesselName: "ALASKA TROJAN",
-                IMO: "IMO7933646",
-                CallSign: "WTS3158",
-                VesselType: "1001",
-                Status: undefined,
-                Length: 28.75,
-                Width: 9.15,
-                Draft: undefined,
-                Cargo: undefined,
-            }
-        ]
-    };
+    const [index, setIndex] = useState(0);
+    const {data: shipsData} = useApi(['/test']);
+
+    useHotkeys('n', () => {
+        setIndex(sliceIndex => sliceIndex + 1);
+    });
+
+    console.log(index);
 
     const [mapState, setMapState] = useState({
         width: '100%',
@@ -45,7 +32,7 @@ export const Index = (props) => {
             <div style={{position: 'absolute', right: 0}}>
                 <FullscreenControl container={document.querySelector('body')}/>
             </div>
-            {shipsData.map((data) => (
+            {shipsData && [shipsData[index]].map((data) => (
                 <MarkerShip {...data}/>
             ))}
         </ReactMapGL>

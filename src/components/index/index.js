@@ -9,11 +9,7 @@ export const Index = (props) => {
     const [index, setIndex] = useState(0);
     const {data: shipsData} = useApi(['/test']);
 
-    useHotkeys('n', () => {
-        setIndex(sliceIndex => sliceIndex + 1);
-    });
-
-    console.log(index);
+    useHotkeys('n', () => setIndex(sliceIndex => sliceIndex + 1));
 
     const [mapState, setMapState] = useState({
         width: '100%',

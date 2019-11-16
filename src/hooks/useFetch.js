@@ -7,9 +7,11 @@ export const useFetch = (url, options) => {
     const [status, setStatus] = useState(undefined);
     const [loading, setLoading] = useState(true);
 
+    const fetch_url = urljoin(...(Array.isArray(url) ? url : [url]));
+
     useEffect(() => {
         (async () => {
-            const response = await fetch(urljoin(...(Array.isArray(url) ? url : [url])), options);
+            const response = await fetch(fetch_url, options);
             setStatus(response.status);
 
             try{
@@ -19,11 +21,12 @@ export const useFetch = (url, options) => {
             }
             catch(e){
                 setError(e);
+                setData(null);
             }
 
             setLoading(false);
         })();
-    }, []);
+    }, url);
 
     return {data, loading, error, status};
 };

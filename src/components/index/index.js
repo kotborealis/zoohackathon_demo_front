@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactMapGL, {FullscreenControl} from 'react-map-gl';
 import styles from './index.css';
 import {MarkerShip} from '../markerShip/MarkerShip';
@@ -6,16 +6,63 @@ import {useApi} from '../../hooks/useApi';
 import {useHotkeys} from 'react-hotkeys-hook';
 
 export const Index = (props) => {
-    const [index, setIndex] = useState(0);
-    const {data: shipsData} = useApi(['/test']);
+    const [shipsTracking, setShipsTracking] = useState({});
 
-    useHotkeys('n', () => setIndex(sliceIndex => sliceIndex + 1));
+    const [currentDate, setCurrentDate] = useState(new Date);
+    const [prevDate, setPrevDate] = useState(new Date);
+
+    useEffect(() => {
+        setCurrentDate(date => {
+            date.setYear(2017);
+            date.setDate(30);
+            date.setHours(21);
+            date.setMinutes(1);
+            date.setSeconds(0);
+            date.setHours(date.getHours() + 10);
+            return date;
+        });
+    }, []);
+
+    useEffect(() => {
+        setPrevDate(date => {
+            date.setYear(2017);
+            date.setDate(30);
+            date.setHours(21);
+            date.setMinutes(0);
+            date.setSeconds(0);
+            date.setHours(date.getHours() + 10);
+            return date;
+        });
+    }, []);
+
+    const {data: shipsData} = useApi(`getShipsInRange?lonStart=-1000&lonEnd=1000&latStart=-1000&latEnd=1000&page=0&pageSize=1000000&dateStart=${Math.floor(prevDate.getTime())}&dateEnd=${Math.floor(currentDate.getTime())}`);
+
+    useEffect(() => {
+        if(!shipsData) return;
+        setShipsTracking(ships => {
+            shipsData.forEach((ship) => ships[ship.vesselName] = ship);
+            return ships;
+        });
+    }, [currentDate.getTime()]);
+
+    useHotkeys('n', () => {
+        setCurrentDate(date_ => {
+            const date = new Date(date_);
+            date.setSeconds(date.getSeconds() + 1);
+            return date;
+        });
+        setPrevDate(date_ => {
+            const date = new Date(date_);
+            date.setSeconds(date.getSeconds() + 1);
+            return date;
+        });
+    });
 
     const [mapState, setMapState] = useState({
         width: '100%',
         height: '100%',
-        latitude: 37.7577,
-        longitude: -122.4376,
+        latitude: 59.50424261907552,
+        longitude: -151.4376,
         zoom: 8
     });
 
@@ -29,8 +76,8 @@ export const Index = (props) => {
             <div style={{position: 'absolute', right: 0}}>
                 <FullscreenControl container={document.querySelector('body')}/>
             </div>
-            {shipsData && [shipsData[index]].map((data) => (
-                <MarkerShip {...data}/>
+            {Object.keys(shipsTracking).map((key) => (
+                <MarkerShip {...shipsTracking[key]}/>
             ))}
         </ReactMapGL>
     </div>);

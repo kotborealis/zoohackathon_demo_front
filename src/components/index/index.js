@@ -24,6 +24,7 @@ export const Index = (props) => {
             {...mapState}
             mapboxApiAccessToken={process.env.MAPBOX_API_TOKEN}
             onViewportChange={setMapState}
+            mapStyle="mapbox://styles/mapbox/dark-v8"
         >
             <div style={{position: 'absolute', right: 0}}>
                 <FullscreenControl container={document.querySelector('body')}/>

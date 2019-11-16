@@ -8,7 +8,7 @@ import {Nav, Navbar} from 'react-bootstrap';
 import {Dashboard} from './components/dashboard/dashboard';
 
 render(
-    (<div>
+    (<div style={{width: "100%"}}>
         <Navbar bg="dark" expand="lg" variant="dark">
             <Navbar.Brand href="/">Zoohack-demo</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav"/>

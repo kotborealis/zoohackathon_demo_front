@@ -4,7 +4,10 @@ const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const mockApi = require('../mock-api/mock-api');
 
+require('dotenv').config();
+
 const PUBLIC_PATH = process.env.PUBLIC_PATH || '/';
+const MAPBOX_API_TOKEN = process.env.MAPBOX_API_TOKEN || null;
 
 module.exports = (env = {prod: false}) => {
     const ifProd = (plugin, _else = undefined) => env.prod ? plugin : _else;
@@ -142,6 +145,7 @@ module.exports = (env = {prod: false}) => {
 
             new webpack.DefinePlugin({
                 'process.env.PUBLIC_PATH': JSON.stringify(PUBLIC_PATH),
+                'process.env.MAPBOX_API_TOKEN': JSON.stringify(MAPBOX_API_TOKEN)
             }),
         ]),
 

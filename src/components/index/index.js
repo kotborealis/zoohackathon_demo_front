@@ -1,10 +1,11 @@
 import React, {useEffect, useRef, useState} from 'react';
-import ReactMapGL, {FullscreenControl, HTMLOverlay, Marker} from 'react-map-gl';
+import ReactMapGL, {FullscreenControl, HTMLOverlay} from 'react-map-gl';
 import styles from './index.css';
 import {MarkerShip} from '../markerShip/MarkerShip';
 import {useApi} from '../../hooks/useApi';
 import {useHotkeys} from 'react-hotkeys-hook';
 import dataMarkers from './markers.json';
+import {MarkerCustom} from '../markerCustom/MarkerCustom';
 
 const apiUrlBuilder = ({
                            lonStart = -1000, lonEnd = -1000,
@@ -52,14 +53,6 @@ export const Index = (props) => {
         dateEnd: timeRange[1]
     }));
 
-    useEffect(() => {
-        if(!shipsApiData) return;
-        setShipsTracking(ships => {
-            shipsApiData.forEach((ship) => ships[ship.vesselName] = ship);
-            return ships;
-        });
-    }, [timeRange[0]]);
-
     useHotkeys('n, p', (event, {key}) => {
         const dir = key === 'n' ? 1 : -1;
         const s = 60 * 1000;
@@ -88,6 +81,21 @@ export const Index = (props) => {
 
     const [enableShipCreation, setEnableShipCreation] = useState(false);
     const [currentShipName, setCurrentShipName] = useState('ПРЕЗИДЕНТ ЕЛЬЦИН');
+
+    useEffect(() => {
+        setShipsTracking(ships => {
+            shipsApiData && shipsApiData.forEach((ship) => ships[ship.vesselName] = ship);
+            markers.current.ships[shipTracksStep] &&
+            markers.current.ships[shipTracksStep].forEach(({longitude, latitude, name}) =>
+                ships[name] = {
+                    vesselName: name,
+                    lat: latitude,
+                    lon: longitude
+                }
+            );
+            return ships;
+        });
+    }, [shipTracksStep]);
 
     const onClickHandler = ({lngLat: [longitude, latitude]}) => {
         if(!debug) return;
@@ -151,15 +159,11 @@ export const Index = (props) => {
                 <FullscreenControl container={document.querySelector('body')}/>
             </div>
             {markers.current.custom.map(({longitude, latitude, marker}) =>
-                <Marker longitude={longitude} latitude={latitude}>{marker}</Marker>
+                <MarkerCustom lon={longitude} lat={latitude} marker={marker}></MarkerCustom>
             )}
             {Object.keys(shipsTracking).map((key) => (
                 <MarkerShip {...shipsTracking[key]}/>
             ))}
-            {markers.current.ships[shipTracksStep] &&
-             markers.current.ships[shipTracksStep].map(({longitude, latitude, name}) =>
-                 <MarkerShip lat={latitude} lon={longitude} vesselName={name}/>
-             )}
             {debug && debugOverlay}
         </ReactMapGL>
     </div>);

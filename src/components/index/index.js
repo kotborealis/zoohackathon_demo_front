@@ -6,59 +6,58 @@ import {useApi} from '../../hooks/useApi';
 import {useHotkeys} from 'react-hotkeys-hook';
 import dataMarkers from './markers.json';
 
+const apiUrlBuilder = ({
+                           lonStart = -1000, lonEnd = -1000,
+                           latStart = -1000, latEnd = 1000,
+                           page = 0, pageSize = 9999,
+                           dateStart, dateEnd
+                       }) =>
+    `getShipsInRange` +
+    `?lonStart=${lonStart}` +
+    `&lonEnd=${lonEnd}` +
+    `&latStart=${latStart}` + `
+        &latEnd=${latEnd}` + `
+        &page=${page}` + `
+        &pageSize=${pageSize}` +
+    `&dateStart=${dateStart}` +
+    `&dateEnd=${dateEnd}`;
+
 export const Index = (props) => {
-    const [, updateState] = useState();
+    const [mapState, setMapState] = useState({
+        width: '100%',
+        height: '100%',
+        latitude: 59.50424261907552,
+        longitude: -151.4376,
+        zoom: 1
+    });
+
+    const [, _updateState] = useState();
+    const updateState = () => _updateState(Math.random());
 
     const [shipsTracking, setShipsTracking] = useState({});
     const [shipTracksStep, setShipTracksStep] = useState(0);
 
-    const [currentDate, setCurrentDate] = useState(new Date);
-    const [prevDate, setPrevDate] = useState(new Date);
+    const [timeRange, setTimeRange] = useState([
+        Date.UTC(2017, 11, 15, 0, 0, 0),
+        Date.UTC(2017, 11, 15, 0, 1, 0)
+    ]);
+
+    const {data: shipsApiData} = useApi(apiUrlBuilder({
+        dateStart: timeRange[0],
+        dateEnd: timeRange[1]
+    }));
 
     useEffect(() => {
-        setCurrentDate(date => {
-            date.setYear(2017);
-            date.setDate(30);
-            date.setHours(21);
-            date.setMinutes(1);
-            date.setSeconds(0);
-            date.setHours(date.getHours() + 10);
-            return date;
-        });
-    }, []);
-
-    useEffect(() => {
-        setPrevDate(date => {
-            date.setYear(2017);
-            date.setDate(30);
-            date.setHours(21);
-            date.setMinutes(0);
-            date.setSeconds(0);
-            date.setHours(date.getHours() + 10);
-            return date;
-        });
-    }, []);
-
-    const {data: shipsData} = useApi(`getShipsInRange?lonStart=-1000&lonEnd=1000&latStart=-1000&latEnd=1000&page=0&pageSize=1000000&dateStart=${Math.floor(prevDate.getTime())}&dateEnd=${Math.floor(currentDate.getTime())}`);
-
-    useEffect(() => {
-        if(!shipsData) return;
+        if(!shipsApiData) return;
         setShipsTracking(ships => {
-            shipsData.forEach((ship) => ships[ship.vesselName] = ship);
+            shipsApiData.forEach((ship) => ships[ship.vesselName] = ship);
             return ships;
         });
-    }, [currentDate.getTime()]);
+    }, [timeRange[0]]);
 
     useHotkeys('n', () => {
-        setCurrentDate(date_ => {
-            const date = new Date(date_);
-            date.setSeconds(date.getSeconds() + 1);
-            return date;
-        });
-        setPrevDate(date_ => {
-            const date = new Date(date_);
-            date.setSeconds(date.getSeconds() + 1);
-            return date;
+        setTimeRange(([prev, cur]) => {
+            return [prev + 60 * 1000, cur + 60 * 1000];
         });
         setShipTracksStep(i => i + 1);
     });
@@ -66,14 +65,6 @@ export const Index = (props) => {
     const [debug, setDebug] = useState(false);
     useHotkeys('d', () => {
         setDebug(debug => !debug);
-    });
-
-    const [mapState, setMapState] = useState({
-        width: '100%',
-        height: '100%',
-        latitude: 59.50424261907552,
-        longitude: -151.4376,
-        zoom: 8
     });
 
     const [enableMarkerCreation, setEnableMarkerCreation] = useState(false);
@@ -94,15 +85,17 @@ export const Index = (props) => {
             markers.current = [...markers.current, {
                 longitude, latitude, marker: currentMarker
             }];
-            updateState(Math.random());
+            updateState();
+            return;
         }
-        else if(enableShipCreation){
+        if(enableShipCreation){
             if(!shipsCustomTracks.current[shipTracksStep])
                 shipsCustomTracks.current[shipTracksStep] = [];
 
             shipsCustomTracks.current[shipTracksStep].push({
                 longitude, latitude, name: currentShipName
             });
+            updateState();
         }
     };
 
@@ -125,21 +118,26 @@ export const Index = (props) => {
             )}
             {debug && <HTMLOverlay
                 redraw={() => <div
-                    style={{color: "black", background: "white", padding: "5px", width: "300px", height: "300px"}}>
-                    <b>Markers</b>
-                    <input type="checkbox" checked={enableMarkerCreation}
-                           onChange={({target: {checked}}) => setEnableMarkerCreation(checked)}/>
-                    <br/>
-                    Current marker: <br/>
-                    <input type={"text"} value={currentMarker}
-                           onChange={({target: {value}}) => setCurrentMarker(value)}/>
-                    <b>Ship creation</b>
-                    <input type="checkbox" checked={enableShipCreation}
-                           onChange={({target: {checked}}) => setEnableShipCreation(checked)}/>
-                    <br/>
-                    Ship name: <br/>
-                    <input type={"text"} value={currentShipName}
-                           onChange={({target: {value}}) => setCurrentShipName(value)}/>
+                    style={{color: "black", background: "white", padding: "5px", width: "100%", height: "300px"}}>
+                    <div>
+                        <b>TimeRange:</b> {(new Date(timeRange[0])).toString()} — {(new Date(timeRange[1])).toString()}
+                    </div>
+                    <div>
+                        <b>Markers: </b>
+                        <input type="checkbox" checked={enableMarkerCreation}
+                               onChange={({target: {checked}}) => setEnableMarkerCreation(checked)}/>
+                        <input type={"text"} value={currentMarker}
+                               onChange={({target: {value}}) => setCurrentMarker(value)}/>
+                    </div>
+                    <div>
+                        <b>Ship creation</b>
+                        <input type="checkbox" checked={enableShipCreation}
+                               onChange={({target: {checked}}) => setEnableShipCreation(checked)}/>
+                        <br/>
+                        Ship name: <br/>
+                        <input type={"text"} value={currentShipName}
+                               onChange={({target: {value}}) => setCurrentShipName(value)}/>
+                    </div>
                 </div>}
             />}
         </ReactMapGL>

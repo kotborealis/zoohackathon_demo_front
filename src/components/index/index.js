@@ -1,11 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react';
-import ReactMapGL, {FullscreenControl, HTMLOverlay} from 'react-map-gl';
+import ReactMapGL, {FullscreenControl, HTMLOverlay, Layer, Source} from 'react-map-gl';
 import styles from './index.css';
 import {MarkerShip} from '../markerShip/MarkerShip';
 import {useApi} from '../../hooks/useApi';
 import {useHotkeys} from 'react-hotkeys-hook';
 import dataMarkers from './markers.json';
 import {MarkerCustom} from '../markerCustom/MarkerCustom';
+import {useFetch} from '../../hooks/useFetch';
+import {heatmapLayer} from './heatmapLayer';
 
 const apiUrlBuilder = ({
                            lonStart = -1000, lonEnd = -1000,
@@ -70,6 +72,11 @@ export const Index = (props) => {
         setDebug(debug => !debug);
     });
 
+    const [enableHeatmap, setEnableHeatmap] = useState(false);
+    useHotkeys('h', () => {
+        setEnableHeatmap(a => !a);
+    });
+
     const markers = useRef(dataMarkers);
 
     const [enableMarkerCreation, setEnableMarkerCreation] = useState(false);
@@ -86,13 +93,7 @@ export const Index = (props) => {
         setShipsTracking(ships => {
             shipsApiData && shipsApiData.forEach((ship) => ships[ship.vesselName] = ship);
             markers.current.ships[shipTracksStep] &&
-            markers.current.ships[shipTracksStep].forEach(({longitude, latitude, name}) =>
-                ships[name] = {
-                    vesselName: name,
-                    lat: latitude,
-                    lon: longitude
-                }
-            );
+            markers.current.ships[shipTracksStep].forEach((ship) => ships[ship.vesselName] = ship);
             return ships;
         });
     }, [shipTracksStep]);
@@ -120,6 +121,8 @@ export const Index = (props) => {
             forceUpdateState();
         }
     };
+
+    const {data: heatmapData} = useFetch(['https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson']);
 
     const debugOverlay = (<HTMLOverlay
         redraw={() => <div
@@ -158,8 +161,11 @@ export const Index = (props) => {
             <div style={{position: 'absolute', right: 0}}>
                 <FullscreenControl container={document.querySelector('body')}/>
             </div>
+            {heatmapData && enableHeatmap && <Source type="geojson" data={heatmapData}>
+                <Layer {...heatmapLayer}/>
+            </Source>}
             {markers.current.custom.map(({longitude, latitude, marker}) =>
-                <MarkerCustom lon={longitude} lat={latitude} marker={marker}></MarkerCustom>
+                <MarkerCustom lon={longitude} lat={latitude} marker={marker}/>
             )}
             {Object.keys(shipsTracking).map((key) => (
                 <MarkerShip {...shipsTracking[key]}/>

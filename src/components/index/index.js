@@ -10,20 +10,20 @@ import {useFetch} from '../../hooks/useFetch';
 import {heatmapLayer} from './heatmapLayer';
 
 const apiUrlBuilder = ({
-                           lonStart = -1000, lonEnd = -1000,
+                           lonStart = -1000, lonEnd = 1000,
                            latStart = -1000, latEnd = 1000,
                            page = 0, pageSize = 9999,
                            dateStart, dateEnd
                        }) =>
     `getShipsInRange` +
-    `?lonStart=${lonStart}` +
-    `&lonEnd=${lonEnd}` +
-    `&latStart=${latStart}` + `
-        &latEnd=${latEnd}` + `
-        &page=${page}` + `
-        &pageSize=${pageSize}` +
-    `&dateStart=${dateStart}` +
-    `&dateEnd=${dateEnd}`;
+    `?lonStart=${lonStart * 1}` +
+    `&lonEnd=${lonEnd * 1}` +
+    `&latStart=${latStart * 1}` + `
+        &latEnd=${latEnd * 1}` + `
+        &page=${page * 1}` + `
+        &pageSize=${pageSize * 1}` +
+    `&dateStart=${dateStart * 1}` +
+    `&dateEnd=${dateEnd * 1}`;
 
 console.warn(`n - advance time by 1 min`);
 console.warn(`~ - show debug`);
@@ -43,7 +43,7 @@ export const Index = (props) => {
     const [shipsTracking, setShipsTracking] = useState({});
     const [shipTracksStep, setShipTracksStep] = useState(0);
 
-    const initialTimeRange = Date.UTC(2017, 11, 15, 0, 0, 0);
+    const initialTimeRange = Date.UTC(2017, 11, 1, 0, 0, 0);
 
     const [timeRange, setTimeRange] = useState([
         initialTimeRange,
@@ -114,7 +114,6 @@ export const Index = (props) => {
                 }
             }
 
-            console.log(ships);
             return ships;
         });
     }, [shipTracksStep, _updateStateState]);

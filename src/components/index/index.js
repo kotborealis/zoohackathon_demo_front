@@ -6,8 +6,8 @@ import {useApi} from '../../hooks/useApi';
 import {useHotkeys} from 'react-hotkeys-hook';
 import dataMarkers from './markers.json';
 import {MarkerCustom} from '../markerCustom/MarkerCustom';
-import {useFetch} from '../../hooks/useFetch';
 import {heatmapLayer} from './heatmapLayer';
+import heatmapJson from './heatmap.json';
 
 const apiUrlBuilder = ({
                            lonStart = -1000, lonEnd = 1000,
@@ -152,7 +152,7 @@ export const Index = (props) => {
         }
     };
 
-    const {data: heatmapData} = useFetch(['https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson']);
+    const {data: heatmapData} = {data: heatmapJson};
 
     const debugOverlay = (<HTMLOverlay
         redraw={() => <div

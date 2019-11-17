@@ -4,6 +4,22 @@ import {Card, Col, Container, Row, Table} from 'react-bootstrap';
 import 'chart.js';
 import {LineChart, PieChart} from 'react-chartkick';
 
+const timestamps = [];
+for(let i = 0; i < 10; i++){
+    const d = new Date(Date.UTC(2017, 11, 1, 0, 0, 0));
+    d.setMinutes(d.getMinutes() + Math.floor(Math.random() + 100 * i));
+    timestamps.push(d.getTime());
+}
+
+const vesselNames = [
+    "SAINT BORIS",
+    "ELTSYN"
+];
+
+const vesselName = () => vesselNames[Math.floor(Math.random() * vesselNames.length)];
+const eventType = () => ["Illegal fishing", "Refrigerator meeting"][Math.random() > 0.5 ? 0 : 1];
+const coords = () => [-150 + Math.random() * 10 * -10, 55 + Math.random() * 10 * -10];
+
 export const Dashboard = () => (
     <Container className={style.container}>
         <Row>
@@ -13,7 +29,7 @@ export const Dashboard = () => (
                         <Card.Title>
                             Triggers by type (this month)
                         </Card.Title>
-                        <PieChart data={[["Slow vessel", 44], ["Suspicious meeting", 23]]}/>
+                        <PieChart data={[["Illegal fishing", 44], ["Refrigerator meeting", 23]]}/>
                     </Card.Body>
                 </Card>
             </Col>
@@ -55,83 +71,23 @@ export const Dashboard = () => (
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Slow vessel</td>
-                        <td>2017-12-01 03:55</td>
-                        <td>SAINT BORIS</td>
-                        <td>-150, 55</td>
-                    </tr>
+                    {(() => {
+                        const _ = [];
+                        for(let i = 0; i < 10; i++){
+                            _.push(<tr>
+                                <td>{i}</td>
+                                <td>{eventType()}</td>
+                                <td>
+                                    {(new Date(timestamps[i])).toDateString()}
+                                    {" at "}
+                                    {(new Date(timestamps[i])).toTimeString().split(' ')[0]}
+                                </td>
+                                <td>{vesselName()}</td>
+                                <td>{coords()}</td>
+                            </tr>);
+                        }
+                        return _;
+                    })()}
                     </tbody>
                 </Table>
             </Col>

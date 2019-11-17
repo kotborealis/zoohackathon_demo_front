@@ -4,6 +4,8 @@
 
 [Read more on Devpost!](https://devpost.com/software/illegal-fishing-detection)
 
+![Screenshot](https://i.imgur.com/75ylv03.png)
+
 ## Run
 
 Create `.env` with Mapbox public token:

@@ -2,6 +2,10 @@
 
 # zoohackathon-demo-front
 
+[Read more on Devpost!](https://devpost.com/software/illegal-fishing-detection)
+
+## Run
+
 Create `.env` with Mapbox public token:
 ```
 MAPBOX_API_TOKEN=pk.#############

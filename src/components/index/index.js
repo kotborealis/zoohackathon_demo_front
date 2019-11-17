@@ -106,9 +106,15 @@ export const Index = (props) => {
             for(let lh_ of Object.keys(ships)){
                 for(let rh_ of Object.keys(ships)){
                     if(lh_ === rh_) continue;
+
                     const lh = ships[lh_];
                     const rh = ships[rh_];
+
+                    if(!lh.forceName || !rh.forceName) continue;
+
                     const dist = Math.sqrt((lh.lat - rh.lat) ** 2 + (lh.lon - rh.lon) ** 2);
+
+                    console.log(lh_, rh_, dist);
 
                     ships[lh_].suspicious = dist < 1 || lh.sog === 0;
                     ships[rh_].suspicious = dist < 1 || rh.sog === 0;
@@ -195,15 +201,15 @@ export const Index = (props) => {
             <div style={{position: 'absolute', right: 0}}>
                 <FullscreenControl container={document.querySelector('body')}/>
             </div>
-            {heatmapData && enableHeatmap && <Source type="geojson" data={heatmapData}>
-                <Layer {...heatmapLayer}/>
-            </Source>}
             {markers.current.custom.map(({longitude, latitude, marker}) =>
                 <MarkerCustom lon={longitude} lat={latitude} marker={marker}/>
             )}
             {Object.keys(shipsTracking).map((key) => (
                 <MarkerShip {...shipsTracking[key]} zoom={mapState.zoom}/>
             ))}
+            {heatmapData && enableHeatmap && <Source type="geojson" data={heatmapData}>
+                <Layer {...heatmapLayer}/>
+            </Source>}
             {debug && debugOverlay}
         </ReactMapGL>
     </div>);

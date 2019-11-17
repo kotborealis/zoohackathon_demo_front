@@ -12,8 +12,10 @@ for(let i = 0; i < 10; i++){
 }
 
 const vesselNames = [
-    "SAINT BORIS",
-    "ELTSYN"
+    "PACIFIC HARMONY",
+    "KATRINA",
+    "JOHN DOE",
+    "AGENT SMITH",
 ];
 
 const vesselName = () => vesselNames[Math.floor(Math.random() * vesselNames.length)];

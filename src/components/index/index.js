@@ -98,7 +98,8 @@ export const Index = (props) => {
                     lon: ship.longitude,
                     lat: ship.latitude,
                     vesselName: ship.name,
-                    sog: ship.sog
+                    sog: ship.sog,
+                    forceName: true
                 }
             );
 
@@ -177,6 +178,9 @@ export const Index = (props) => {
                 <input type={"text"} value={currentShipName}
                        onChange={({target: {value}}) => setCurrentShipName(value)}/>
             </div>
+            <div>
+                zoom={mapState.zoom}
+            </div>
         </div>}
     />);
 
@@ -198,7 +202,7 @@ export const Index = (props) => {
                 <MarkerCustom lon={longitude} lat={latitude} marker={marker}/>
             )}
             {Object.keys(shipsTracking).map((key) => (
-                <MarkerShip {...shipsTracking[key]}/>
+                <MarkerShip {...shipsTracking[key]} zoom={mapState.zoom}/>
             ))}
             {debug && debugOverlay}
         </ReactMapGL>

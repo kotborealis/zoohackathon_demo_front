@@ -100,6 +100,24 @@ export const Index = (props) => {
                     vesselName: ship.name
                 }
             );
+
+            for(let lh_ of Object.keys(ships)){
+                for(let rh_ of Object.keys(ships)){
+                    if(lh_ === rh_) continue;
+                    const lh = ships[lh_];
+                    const rh = ships[rh_];
+                    const dist = Math.sqrt((lh.lat - rh.lat) ** 2 + (lh.lon - rh.lon) ** 2);
+
+                    console.log(lh_, rh_, dist, dist < 3);
+
+                    if(dist < 3){
+                        ships[lh_].suspicious = true;
+                        ships[rh_].suspicious = true;
+                    }
+                }
+            }
+
+            console.log(ships);
             return ships;
         });
     }, [shipTracksStep, _updateStateState]);

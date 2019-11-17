@@ -37,7 +37,7 @@ export const Index = (props) => {
         zoom: 1
     });
 
-    const [, _updateState] = useState();
+    const [_updateStateState, _updateState] = useState();
     const forceUpdateState = () => _updateState(Math.random());
 
     const [shipsTracking, setShipsTracking] = useState({});
@@ -93,10 +93,16 @@ export const Index = (props) => {
         setShipsTracking(ships => {
             shipsApiData && shipsApiData.forEach((ship) => ships[ship.vesselName] = ship);
             markers.current.ships[shipTracksStep] &&
-            markers.current.ships[shipTracksStep].forEach((ship) => ships[ship.vesselName] = ship);
+            markers.current.ships[shipTracksStep].forEach((ship) =>
+                ships[ship.name] = {
+                    lon: ship.longitude,
+                    lat: ship.latitude,
+                    vesselName: ship.name
+                }
+            );
             return ships;
         });
-    }, [shipTracksStep]);
+    }, [shipTracksStep, _updateStateState]);
 
     const onClickHandler = ({lngLat: [longitude, latitude]}) => {
         if(!debug) return;
@@ -118,6 +124,16 @@ export const Index = (props) => {
             markers.current.ships[shipTracksStep].push({
                 longitude, latitude, name: currentShipName
             });
+
+            setShipsTracking(ships => {
+                ships[currentShipName] = {
+                    lon: longitude,
+                    lat: latitude,
+                    vesselName: currentShipName
+                };
+                return ships;
+            });
+
             forceUpdateState();
         }
     };

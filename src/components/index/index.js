@@ -97,7 +97,8 @@ export const Index = (props) => {
                 ships[ship.name] = {
                     lon: ship.longitude,
                     lat: ship.latitude,
-                    vesselName: ship.name
+                    vesselName: ship.name,
+                    sog: ship.sog
                 }
             );
 
@@ -108,12 +109,8 @@ export const Index = (props) => {
                     const rh = ships[rh_];
                     const dist = Math.sqrt((lh.lat - rh.lat) ** 2 + (lh.lon - rh.lon) ** 2);
 
-                    console.log(lh_, rh_, dist, dist < 3);
-
-                    if(dist < 3){
-                        ships[lh_].suspicious = true;
-                        ships[rh_].suspicious = true;
-                    }
+                    ships[lh_].suspicious = dist < 1 || lh.sog === 0;
+                    ships[rh_].suspicious = dist < 1 || rh.sog === 0;
                 }
             }
 

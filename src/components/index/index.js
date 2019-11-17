@@ -28,6 +28,9 @@ const apiUrlBuilder = ({
 console.warn(`n - advance time by 1 min`);
 console.warn(`~ - show debug`);
 
+let firstSms = false;
+let secondSms = false;
+
 export const Index = (props) => {
     const [mapState, setMapState] = useState({
         width: '100%',
@@ -103,6 +106,8 @@ export const Index = (props) => {
                 }
             );
 
+            const flag = false;
+
             for(let lh_ of Object.keys(ships)){
                 for(let rh_ of Object.keys(ships)){
                     if(lh_ === rh_) continue;
@@ -114,7 +119,18 @@ export const Index = (props) => {
 
                     const dist = Math.sqrt((lh.lat - rh.lat) ** 2 + (lh.lon - rh.lon) ** 2);
 
-                    console.log(lh_, rh_, dist);
+                    if(dist < 1 && !firstSms){
+                        firstSms = true;
+                        fetch(`https://sms.ru/sms/send?api_id=92EE0AD5-902D-****-3C1C-A590C81B70AA&to=791211915**&msg=${
+                            encodeURI(`Event at ${Math.floor(lh.lat)}:${Math.floor(lh.lon)}: Refrigerator meeting`)
+                            }&json=1`);
+                    }
+                    else if(lh.sog === 0 && !secondSms){
+                        secondSms = true;
+                        fetch(`https://sms.ru/sms/send?api_id=92EE0AD5-902D-****-3C1C-A590C81B70AA&to=791211915**&msg=${
+                            encodeURI(`Event at ${Math.floor(lh.lat)}:${Math.floor(lh.lon)}: Illegal fishing`)
+                            }&json=1`);
+                    }
 
                     ships[lh_].suspicious = dist < 1 || lh.sog === 0;
                     ships[rh_].suspicious = dist < 1 || rh.sog === 0;

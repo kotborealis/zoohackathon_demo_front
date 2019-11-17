@@ -1,7 +1,7 @@
 module.exports = [
     {
         context: ['/api/v1'],
-        target: 'http://172.25.102.32:8080/',
+        target: 'http://127.0.0.1:8081/',
         pathRewrite: {'^/api/v1': '/rest/api'},
     },
     //{

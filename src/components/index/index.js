@@ -50,7 +50,7 @@ export const Index = (props) => {
         initialTimeRange + 60 * 1000
     ]);
 
-    const {data: shipsApiData} = useApi(apiUrlBuilder({
+    const {data: shipsApiData = []} = useApi(apiUrlBuilder({
         dateStart: timeRange[0],
         dateEnd: timeRange[1]
     }));
@@ -123,7 +123,7 @@ export const Index = (props) => {
 
             return ships;
         });
-    }, [shipTracksStep, _updateStateState]);
+    }, [shipTracksStep, _updateStateState, shipsApiData.length]);
 
     const onClickHandler = ({lngLat: [longitude, latitude]}) => {
         if(!debug) return;
